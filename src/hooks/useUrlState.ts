@@ -6,23 +6,23 @@ import { useDebounce } from '@/hooks/useDebounce'
  * Enables shareable URLs and browser back/forward navigation
  */
 export const useUrlState = () => {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [currentPage, setCurrentPage] = useState(1)
-  const [itemsPerPage, setItemsPerPage] = useState(20)
+  // Initialize state from URL parameters immediately
+  const getInitialState = () => {
+    const urlParams = new URLSearchParams(window.location.search)
+    return {
+      query: urlParams.get('q') || '',
+      page: parseInt(urlParams.get('page') || '1', 10),
+      limit: parseInt(urlParams.get('limit') || '20', 10)
+    }
+  }
+
+  const initialState = getInitialState()
+  const [searchQuery, setSearchQuery] = useState(initialState.query)
+  const [currentPage, setCurrentPage] = useState(initialState.page)
+  const [itemsPerPage, setItemsPerPage] = useState(initialState.limit)
+  
   // Debounce search to prevent excessive URL updates during typing
   const debouncedQuery = useDebounce(searchQuery, 500)
-
-  // Initialize state from URL parameters on component mount
-  useEffect(() => {
-    const urlParams = new URLSearchParams(window.location.search)
-    const query = urlParams.get('q') || ''
-    const page = parseInt(urlParams.get('page') || '1', 10)
-    const limit = parseInt(urlParams.get('limit') || '20', 10)
-    
-    setSearchQuery(query)
-    setCurrentPage(page)
-    setItemsPerPage(limit)
-  }, [])
 
   // Sync state changes to URL parameters (only include non-default values)
   useEffect(() => {

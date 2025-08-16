@@ -10,6 +10,7 @@ const STORAGE_KEY = "pokemon-comparison";
 export function useComparisonDrawer() {
   const [pokemonList, setPokemonList] = useState<ComparisonPokemon[]>([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   // Restore comparison list from localStorage on mount
   useEffect(() => {
@@ -23,17 +24,21 @@ export function useComparisonDrawer() {
       }
     } catch (error) {
       console.error("Error loading comparison data from localStorage:", error);
+    } finally {
+      setIsInitialized(true);
     }
   }, []);
 
-  // Persist comparison list changes to localStorage
+  // Persist comparison list changes to localStorage (skip initial render)
   useEffect(() => {
+    if (!isInitialized) return;
+
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(pokemonList));
     } catch (error) {
       console.error("Error saving comparison data to localStorage:", error);
     }
-  }, [pokemonList]);
+  }, [pokemonList, isInitialized]);
 
   const addPokemon = (pokemon: Pokemon) => {
     // Enforce maximum of 3 Pokemon for comparison
